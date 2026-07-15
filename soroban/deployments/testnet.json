@@ -1,0 +1,14 @@
+{
+  "contract_name": "LokaFi Invoice Registry",
+  "network": "testnet",
+  "contract_id": "CBKQDSBN66VQ4QNYSVK73H4YXG3O4ZEBANJPS76XHB6K46ICLUQSSM2W",
+  "alias": "lokafi_invoice_registry",
+  "deployer_public_key": "GDDG45RVBJSICPWIS5UV45S3X23UAX64FILXAT7A4C2HSNHONH5S4COI",
+  "wasm_path": "target/wasm32v1-none/release/lokafi_invoice_registry.wasm",
+  "wasm_sha256": "7e52def42add4f453b0587a1b80d9805330d787b24bc99793163ce714bc1a059",
+  "contract_version": "lokafi_invoice_registry_v1",
+  "wasm_upload_transaction_hash": "5a18dbeb5bdabf45a273342026211cc318cf87dc91f17bfbc6dbf8a18c626b82",
+  "deployment_transaction_hash": "b662037620ffd6153dd387192f9968a4d94fc96eb7ca853ee70c2fa52b7938a5",
+  "initialization_transaction_hash": "4efa06809dd3c30123f17fc64e86b5e7565a6be29f0ed93720b3ec4362b4161b",
+  "deployed_at": "2026-07-15T18:23:40.7865505Z"
+}

@@ -4,6 +4,51 @@ LokaFi is a hackathon adaptation of an existing university personal finance appl
 
 The MVP flow is: merchant connects Freighter, creates an IDR invoice with a demo XLM equivalent, customer pays native Testnet XLM through Freighter, backend verifies the transaction on Stellar Testnet, invoice becomes paid, and an income transaction appears in the existing finance dashboard.
 
+## Stellar Smart Contract
+
+- Contract: LokaFi Invoice Registry
+- Network: Stellar Testnet
+- Contract Address: `CBKQDSBN66VQ4QNYSVK73H4YXG3O4ZEBANJPS76XHB6K46ICLUQSSM2W`
+- Alias: `lokafi_invoice_registry`
+- Contract Version: `lokafi_invoice_registry_v1`
+
+The contract stores safe on-chain invoice references and verified settlement receipts while preventing duplicate invoice settlement and reused transaction hashes. It exposes:
+
+- `initialize`
+- `register_invoice`
+- `mark_invoice_paid`
+- `get_invoice`
+- `invoice_exists`
+- `is_transaction_used`
+- `version`
+
+The Laravel backend verifies the Stellar payment network, recipient, asset, amount, memo, status, and transaction hash. After verification, the Soroban contract provides an additional on-chain registry for invoice references and verified settlement receipts. This deployment uses Stellar Testnet only and does not process real money.
+
+Build and inspect the exact deployed contract source:
+
+```powershell
+cd soroban
+cargo test --locked
+stellar contract build --locked
+stellar contract info interface --wasm target\wasm32v1-none\release\lokafi_invoice_registry.wasm
+```
+
+Deploy and verify with the local Testnet identity alias (the identity secret remains outside the repository):
+
+```powershell
+stellar contract deploy `
+  --wasm target\wasm32v1-none\release\lokafi_invoice_registry.wasm `
+  --source-account lokafi-deployer `
+  --network testnet `
+  --alias lokafi_invoice_registry
+
+stellar contract invoke `
+  --id lokafi_invoice_registry `
+  --source-account lokafi-deployer `
+  --network testnet `
+  -- version
+```
+
 ## Architecture
 
 - Backend: Laravel REST API in `fiscal-architect-api`.
@@ -161,11 +206,14 @@ Public:
 - `GET /api/public/invoices/{uuid}`
 - `POST /api/public/invoices/{uuid}/verify-payment`
 
-## Known Limitations
+## Current MVP Limitations
 
-- Stellar Mainnet is intentionally unsupported.
-- XLM/IDR conversion is demo data, not a real market rate.
-- No custodial wallet is implemented.
-- Freighter must sign in the browser.
-- Backend tests mock Horizon responses; live payment testing is manual.
-- No smart contracts, real banking movement, fiat on-ramp, KYC, or real settlement is included.
+- LokaFi includes a Soroban smart contract for registering invoice references and verified settlement receipts on-chain.
+- The Soroban contract does not custody funds or independently transfer user assets.
+- Stellar payments currently operate on Stellar Testnet only.
+- Bank and e-wallet activity is imported through CSV statements, not live account synchronization.
+- Direct banking movement is not supported.
+- Fiat on-ramp and off-ramp are not included.
+- Production-grade KYC and AML verification are not included.
+- The MVP does not process real-money settlement.
+- The current deployment is intended for hackathon demonstration and evaluation.
