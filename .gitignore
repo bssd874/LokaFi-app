@@ -2,6 +2,13 @@
 .env
 .env.*
 !.env.example
+!**/.env.example
+.env.before-stellar
+
+# Requested local-only project docs
+AGENTS.md
+DEMO_SCRIPT.md
+docs/
 
 # Laravel
 backend/vendor/
@@ -11,11 +18,22 @@ backend/storage/framework/sessions/*
 backend/storage/framework/views/*
 backend/bootstrap/cache/*
 backend/public/storage
+**/vendor/
+**/.phpunit.result.cache
+**/storage/logs/*
+**/storage/framework/cache/*
+**/storage/framework/sessions/*
+**/storage/framework/views/*
+**/bootstrap/cache/*
+**/public/storage
 
 # React / Node
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+**/node_modules/
+**/dist/
+**/.vite/
 
 # Backup and database
 *.sql
@@ -32,3 +50,4 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
