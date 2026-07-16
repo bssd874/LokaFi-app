@@ -624,8 +624,8 @@ export function TransactionsPage() {
                             </p>
                         </div>
 
-                        <div className="grid min-w-0 gap-3 md:grid-cols-2 2xl:grid-cols-8">
-                            <div className="relative 2xl:col-span-2">
+                        <div className="grid min-w-0 gap-3 md:grid-cols-2">
+                            <div className="relative">
                                 <Search
                                     size={16}
                                     className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -677,7 +677,7 @@ export function TransactionsPage() {
                                 ))}
                             </select>
 
-                            <div className="grid min-w-0 grid-cols-2 gap-2 2xl:col-span-2">
+                            <div className="grid min-w-0 grid-cols-2 gap-2">
                                 <input
                                     type="date"
                                     value={filterFrom}
