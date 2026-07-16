@@ -612,7 +612,7 @@ export function TransactionsPage() {
                 </div>
             </section>
 
-            <div className="grid min-w-0 gap-6">
+            <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,1fr)]">
                 <div className="min-w-0 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
                     <div className="mb-5 flex flex-col justify-between gap-4">
                         <div>
@@ -798,11 +798,11 @@ export function TransactionsPage() {
                             </p>
                         </div>
                     ) : (
-                        <div className="max-w-full overflow-hidden rounded-2xl border border-slate-100">
-                            <table className="w-full table-fixed text-left text-sm">
+                        <div className="max-w-full overflow-x-auto rounded-2xl border border-slate-100">
+                            <table className="w-full min-w-[1120px] text-left text-sm">
                                 <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
                                     <tr>
-                                        <th className="w-10 px-3 py-3">
+                                        <th className="px-4 py-3">
                                             <input
                                                 type="checkbox"
                                                 checked={allVisibleSelected}
@@ -810,13 +810,13 @@ export function TransactionsPage() {
                                                 className="h-4 w-4 rounded border-slate-300"
                                             />
                                         </th>
-                                        <th className="w-[24%] px-3 py-3">Transaction</th>
-                                        <th className="hidden w-[16%] px-3 py-3 lg:table-cell">Status</th>
-                                        <th className="w-[20%] px-3 py-3">Category</th>
-                                        <th className="hidden w-[11%] px-3 py-3 xl:table-cell">Wallet</th>
-                                        <th className="hidden w-[10%] px-3 py-3 xl:table-cell">Date</th>
-                                        <th className="w-[11%] px-3 py-3 text-right">Amount</th>
-                                        <th className="w-[12%] px-3 py-3 text-right">Action</th>
+                                        <th className="px-4 py-3">Transaction</th>
+                                        <th className="px-4 py-3">Status</th>
+                                        <th className="px-4 py-3">Category</th>
+                                        <th className="px-4 py-3">Wallet</th>
+                                        <th className="px-4 py-3">Date</th>
+                                        <th className="px-4 py-3 text-right">Amount</th>
+                                        <th className="px-4 py-3 text-right">Action</th>
                                     </tr>
                                 </thead>
 
@@ -829,7 +829,7 @@ export function TransactionsPage() {
 
                                         return (
                                             <tr key={transaction.id} className="hover:bg-slate-50">
-                                                <td className="px-3 py-4 align-top">
+                                                <td className="px-4 py-4 align-top">
                                                     <input
                                                         type="checkbox"
                                                         checked={selectedIds.includes(transaction.id)}
@@ -838,10 +838,10 @@ export function TransactionsPage() {
                                                     />
                                                 </td>
 
-                                                <td className="px-3 py-4 align-top">
-                                                    <div className="flex min-w-0 items-start gap-3">
+                                                <td className="px-4 py-4">
+                                                    <div className="flex items-start gap-3">
                                                         <div
-                                                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                                                            className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                                                                 transaction.type === "income"
                                                                     ? "bg-emerald-50 text-emerald-700"
                                                                     : transaction.type === "expense"
@@ -858,8 +858,8 @@ export function TransactionsPage() {
                                                             )}
                                                         </div>
 
-                                                        <div className="min-w-0">
-                                                            <p className="break-words font-semibold text-slate-900">
+                                                        <div>
+                                                            <p className="font-semibold text-slate-900">
                                                                 {transaction.merchant
                                                                     || transaction.sanitized_description
                                                                     || transaction.description
@@ -882,31 +882,11 @@ export function TransactionsPage() {
                                                                     {sourceBadge.label}
                                                                 </span>
                                                             </div>
-                                                            <div className="mt-2 flex flex-wrap gap-1 lg:hidden">
-                                                                <span
-                                                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${statusBadge.className}`}
-                                                                >
-                                                                    {statusBadge.icon}
-                                                                    {statusBadge.label}
-                                                                </span>
-                                                                <span
-                                                                    className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${confidenceBadge.className}`}
-                                                                >
-                                                                    {confidenceBadge.label}
-                                                                </span>
-                                                            </div>
-                                                            <p className="mt-2 break-words text-xs text-slate-500 xl:hidden">
-                                                                {transaction.type === "transfer"
-                                                                    ? `${transaction.from_wallet?.name ?? "-"} -> ${transaction.to_wallet?.name ?? "-"}`
-                                                                    : transaction.wallet?.name ?? "-"}
-                                                                {" · "}
-                                                                {formatDate(transaction.happened_at)}
-                                                            </p>
                                                         </div>
                                                     </div>
                                                 </td>
 
-                                                <td className="hidden px-3 py-4 align-top lg:table-cell">
+                                                <td className="px-4 py-4">
                                                     <div className="space-y-2">
                                                         <span
                                                             className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${statusBadge.className}`}
@@ -932,7 +912,7 @@ export function TransactionsPage() {
                                                     </div>
                                                 </td>
 
-                                                <td className="px-3 py-4 align-top">
+                                                <td className="px-4 py-4">
                                                     {transaction.type === "transfer" ? (
                                                         <span className="text-slate-500">Transfer</span>
                                                     ) : (
@@ -973,7 +953,7 @@ export function TransactionsPage() {
                                                                     handleCategoryChange(transaction, event.target.value)
                                                                 }
                                                                 disabled={categorizingId === transaction.id}
-                                                                className="min-w-0 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 disabled:opacity-60"
+                                                                className="w-48 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 disabled:opacity-60"
                                                             >
                                                                 <option value="">Pilih kategori</option>
                                                                 {options.map((category) => (
@@ -990,7 +970,7 @@ export function TransactionsPage() {
                                                     )}
                                                 </td>
 
-                                                <td className="hidden break-words px-3 py-4 align-top text-slate-600 xl:table-cell">
+                                                <td className="px-4 py-4 text-slate-600">
                                                     {transaction.type === "transfer"
                                                         ? `${transaction.from_wallet?.name ?? "-"} -> ${
                                                             transaction.to_wallet?.name ?? "-"
@@ -998,12 +978,12 @@ export function TransactionsPage() {
                                                         : transaction.wallet?.name ?? "-"}
                                                 </td>
 
-                                                <td className="hidden px-3 py-4 align-top text-slate-600 xl:table-cell">
+                                                <td className="px-4 py-4 text-slate-600">
                                                     {formatDate(transaction.happened_at)}
                                                 </td>
 
                                                 <td
-                                                    className={`whitespace-nowrap px-3 py-4 text-right text-xs font-bold sm:text-sm ${
+                                                    className={`px-4 py-4 text-right font-bold ${
                                                         transaction.type === "income"
                                                             ? "text-emerald-600"
                                                             : transaction.type === "expense"
@@ -1019,8 +999,8 @@ export function TransactionsPage() {
                                                     {formatCurrency(transaction.amount)}
                                                 </td>
 
-                                                <td className="px-3 py-4 text-right align-top">
-                                                    <div className="flex flex-wrap justify-end gap-1">
+                                                <td className="px-4 py-4 text-right">
+                                                    <div className="flex justify-end gap-1">
                                                         {transaction.type !== "transfer" && !transaction.category_id && (
                                                             <>
                                                                 <button
@@ -1084,7 +1064,7 @@ export function TransactionsPage() {
                         </p>
                     </div>
 
-                    <div className="mb-5 grid max-w-xl grid-cols-3 gap-2 rounded-2xl bg-slate-100 p-1">
+                    <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-100 p-1">
                         {(["expense", "income", "transfer"] as TransactionType[]).map((item) => (
                             <button
                                 key={item}
@@ -1101,10 +1081,7 @@ export function TransactionsPage() {
                         ))}
                     </div>
 
-                    <form
-                        onSubmit={handleCreateTransaction}
-                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-                    >
+                    <form onSubmit={handleCreateTransaction} className="space-y-4">
                         {type === "transfer" ? (
                             <>
                                 <FieldSelect
@@ -1185,7 +1162,7 @@ export function TransactionsPage() {
                             onChange={setHappenedAt}
                         />
 
-                        <div className="md:col-span-2 xl:col-span-3">
+                        <div>
                             <label className="text-sm font-semibold text-slate-700">Note</label>
                             <textarea
                                 value={note}
@@ -1199,7 +1176,7 @@ export function TransactionsPage() {
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60 md:col-span-2 xl:col-span-3"
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
                         >
                             {submitting ? (
                                 <>
