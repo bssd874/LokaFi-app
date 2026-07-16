@@ -15,9 +15,40 @@ The hosted MVP uses Stellar Testnet only and does not process real money.
 
 ## Judge Testing
 
-See [`TESTING.md`](TESTING.md) for the hosted smoke test, deterministic local
-dataset, CSV fixtures and expected counts, Stellar Testnet payment flow,
-automated commands, and troubleshooting notes.
+Judges can test the hosted application without running a local environment:
+
+1. Open https://lokafi-app-bssd874.vercel.app.
+2. Sign in with `demo@lokafi.test` / `password` for a product tour, or register
+   a fresh account when validating exact import counts and payment records.
+3. Open **Dashboard**, **Accounts**, **Transactions**, **Budgets**, and
+   **Financial Analytics** to verify the existing finance workflows.
+4. In **Accounts**, add a Bank Account and an E-Wallet, then use **Import CSV**
+   with the synthetic files in [`demo-data/video-demo`](demo-data/video-demo).
+5. Preview and map the CSV columns before confirming the import. Imported,
+   duplicate, invalid, and failed rows are reported separately.
+6. Open **Transactions** to review or correct categories, then verify that the
+   dashboard, budgets, and analytics reflect the imported records.
+
+Expected CSV results for a fresh account:
+
+| Test file | Imported | Duplicate | Invalid | Failed |
+| --- | ---: | ---: | ---: | ---: |
+| `bank_statement_video_demo.csv` | 12 | 0 | 0 | 0 |
+| `ewallet_statement_video_demo.csv` | 10 | 0 | 0 | 0 |
+| `bank_statement_duplicate_demo.csv` | 1 | 1 | 0 | 0 |
+| `bank_statement_invalid_demo.csv` | 1 | 0 | 3 | 0 |
+
+For the Stellar payment test, install Freighter, select **Testnet**, and use
+two funded Testnet accounts. Connect the merchant account under
+**Accounts > Stellar**, create an invoice, open its public link in a separate
+browser profile, and approve the native XLM payment with the customer account.
+The invoice becomes paid only after backend verification and must create
+exactly one Stellar payment record and one income transaction.
+
+See the complete [`TESTING.md`](TESTING.md) guide for column mappings, the
+deterministic local dataset, automated verification commands, Soroban checks,
+idempotency scenarios, and troubleshooting notes. All packaged CSV data is
+synthetic and contains no bank credentials or wallet secrets.
 
 ## Stellar Smart Contract
 
