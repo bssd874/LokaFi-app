@@ -150,6 +150,15 @@ function mappedValue(row: TransactionImportRow, mapping: TransactionImportMappin
     return row.raw_payload[column] || "-";
 }
 
+function isRequestTimeout(error: unknown) {
+    return Boolean(
+        error
+        && typeof error === "object"
+        && "code" in error
+        && error.code === "ECONNABORTED",
+    );
+}
+
 export function TransactionImportPage() {
     const [wallets, setWallets] = useState<Wallet[]>([]);
     const [sourceType, setSourceType] = useState<TransactionImportSourceType>("bank_csv");
@@ -260,8 +269,10 @@ export function TransactionImportPage() {
             );
         } catch (err: unknown) {
             setError(
-                getFirstValidationError(err) ??
-                getApiErrorMessage(err, "Gagal commit import CSV"),
+                isRequestTimeout(err)
+                    ? "Import melewati batas waktu 90 detik. Data aman untuk dicoba ulang karena commit bersifat idempotent."
+                    : getFirstValidationError(err) ??
+                        getApiErrorMessage(err, "Gagal commit import CSV"),
             );
         } finally {
             setCommitting(false);

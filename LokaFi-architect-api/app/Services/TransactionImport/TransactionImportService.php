@@ -102,6 +102,7 @@ class TransactionImportService
                 'failed_count' => 0,
             ];
             $seenFingerprints = [];
+            $balanceDelta = 0.0;
 
             $rows = $lockedBatch->rows()
                 ->orderBy('row_number')
@@ -144,7 +145,7 @@ class TransactionImportService
                     $attributes['import_row_id'] = $row->id;
 
                     $transaction = Transaction::create($attributes);
-                    $this->balanceService->apply($transaction);
+                    $balanceDelta += $this->balanceService->delta($transaction);
                     $transaction = $this->categorizationService->apply($transaction);
 
                     $row->update([
@@ -180,6 +181,8 @@ class TransactionImportService
                     $counts['failed_count']++;
                 }
             }
+
+            $this->balanceService->applyDelta($wallet, $balanceDelta);
 
             $lockedBatch->update(array_merge($counts, [
                 'column_mapping' => $cleanMapping,

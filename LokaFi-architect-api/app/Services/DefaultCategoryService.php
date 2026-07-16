@@ -6,6 +6,9 @@ use App\Models\User;
 
 class DefaultCategoryService
 {
+    /** @var array<int, true> */
+    private array $ensuredUserIds = [];
+
     private const CATEGORIES = [
         ['name' => 'Pemasukan', 'type' => 'income', 'icon' => 'wallet', 'color' => '#22C55E'],
         ['name' => 'Makanan dan Minuman', 'type' => 'expense', 'icon' => 'utensils', 'color' => '#EF4444'],
@@ -25,6 +28,10 @@ class DefaultCategoryService
 
     public function ensureForUser(User $user): void
     {
+        if (isset($this->ensuredUserIds[$user->id])) {
+            return;
+        }
+
         foreach (self::CATEGORIES as $category) {
             $user->categories()->firstOrCreate(
                 [
@@ -38,5 +45,7 @@ class DefaultCategoryService
                 ],
             );
         }
+
+        $this->ensuredUserIds[$user->id] = true;
     }
 }

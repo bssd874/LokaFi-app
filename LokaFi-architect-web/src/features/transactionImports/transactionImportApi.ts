@@ -36,6 +36,7 @@ export async function commitTransactionImport(payload: {
     const response = await apiClient.post<TransactionImportResultResponse>(
         "/transaction-imports/commit",
         payload,
+        { timeout: 90_000 },
     );
 
     return response.data.data;

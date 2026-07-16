@@ -722,7 +722,7 @@ function BankEwalletTab({
                 />
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-2">
+            <div className="space-y-8">
                 <WalletSection
                     title="Bank Accounts"
                     description="Local bank account labels and balances. Use CSV import for statements."
@@ -897,7 +897,7 @@ function WalletSection({
     onDelete: (wallet: Wallet) => void;
 }) {
     return (
-        <section className="space-y-4">
+        <section className="min-w-0 space-y-4">
             <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
                 <div>
                     <h2 className="text-xl font-bold text-slate-950">{title}</h2>
@@ -913,15 +913,15 @@ function WalletSection({
                     {wallets.map((wallet) => (
                         <div
                             key={wallet.id}
-                            className="rounded-2xl border border-slate-100 bg-slate-50 p-5 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
+                            className="min-w-0 rounded-2xl border border-slate-100 bg-slate-50 p-5 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
                         >
                             <div className="flex items-start justify-between gap-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="rounded-2xl bg-blue-100 p-3 text-blue-700">
+                                <div className="flex min-w-0 items-center gap-3">
+                                    <div className="shrink-0 rounded-2xl bg-blue-100 p-3 text-blue-700">
                                         {icon}
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-slate-950">{wallet.name}</h3>
+                                    <div className="min-w-0">
+                                        <h3 className="break-words font-bold text-slate-950">{wallet.name}</h3>
                                         <p className="text-sm text-slate-500">
                                             {walletTypeLabel(wallet.type)} - {wallet.currency}
                                         </p>
@@ -944,7 +944,7 @@ function WalletSection({
 
                             <div className="mt-5">
                                 <p className="text-sm text-slate-500">Current Balance</p>
-                                <p className="mt-1 text-2xl font-bold text-slate-950">
+                                <p className="mt-1 break-words text-2xl font-bold text-slate-950">
                                     {formatBalance(wallet.current_balance)}
                                 </p>
                             </div>
@@ -1091,7 +1091,7 @@ function CsvImportButton({ label }: { label: string }) {
     return (
         <Link
             to="/transaction-imports"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
         >
             <Upload size={16} />
             {label}
