@@ -1,0 +1,114 @@
+services:
+  - type: web
+    name: lokafi-api-bssd874
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    rootDir: LokaFi-architect-api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: LokaFi
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: https://lokafi-api-bssd874.onrender.com
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: lokafi-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: lokafi-postgres
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: lokafi-postgres
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: lokafi-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: lokafi-postgres
+          property: password
+      - key: DB_SSLMODE
+        value: prefer
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: MAIL_MAILER
+        value: log
+      - key: FRONTEND_URL
+        value: https://lokafi-app-bssd874.onrender.com
+      - key: FRONTEND_HTTPS_URL
+        value: https://lokafi-app-bssd874.onrender.com
+      - key: LOKAFI_SEED_DEMO
+        value: "true"
+      - key: AI_ENABLED
+        value: "true"
+      - key: AI_PROVIDER
+        value: nvidia
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_API_BASE_URL
+        value: https://integrate.api.nvidia.com/v1/chat/completions
+      - key: AI_MODEL
+        value: google/gemma-3n-e4b-it
+      - key: AI_TIMEOUT_SECONDS
+        value: "60"
+      - key: AI_FINANCIAL_INSIGHTS_ENABLED
+        value: "true"
+      - key: AI_FINANCIAL_INSIGHT_MODEL
+        value: google/gemma-3n-e4b-it
+      - key: AI_FINANCIAL_INSIGHT_PROMPT_VERSION
+        value: financial_insight_id_v2
+      - key: AI_FINANCIAL_INSIGHT_TIMEOUT_SECONDS
+        value: "60"
+      - key: AI_FINANCIAL_INSIGHT_CACHE_HOURS
+        value: "24"
+
+  - type: web
+    name: lokafi-app-bssd874
+    runtime: static
+    branch: main
+    rootDir: LokaFi-architect-web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    autoDeploy: true
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://lokafi-api-bssd874.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: lokafi-postgres
+    databaseName: lokafi
+    user: lokafi
+    plan: free
+    region: singapore
+    postgresMajorVersion: "16"
+    ipAllowList: []
