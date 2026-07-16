@@ -301,7 +301,7 @@ export function DashboardPage() {
 
     return (
         <div className="max-w-full space-y-7 overflow-hidden">
-            <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
+            <div className="space-y-4">
                 <div className="min-w-0">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-950">
                         Dashboard
@@ -317,13 +317,13 @@ export function DashboardPage() {
                         event.preventDefault();
                         void fetchDashboard({ background: true });
                     }}
-                    className="grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:grid-cols-2 xl:flex xl:items-end"
+                    className="grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:items-end"
                 >
                     <Field label="Periode">
                         <button
                             type="button"
                             onClick={applyLast30Days}
-                            className="w-full rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100 xl:w-36"
+                            className="w-full rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
                         >
                             30 Hari Terakhir
                         </button>
@@ -333,7 +333,7 @@ export function DashboardPage() {
                             type="date"
                             value={startDate}
                             onChange={(event) => setStartDate(event.target.value)}
-                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 xl:w-40"
+                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
                         />
                     </Field>
                     <Field label="Sampai">
@@ -341,14 +341,14 @@ export function DashboardPage() {
                             type="date"
                             value={endDate}
                             onChange={(event) => setEndDate(event.target.value)}
-                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 xl:w-40"
+                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
                         />
                     </Field>
                     <Field label="Akun">
                         <select
                             value={walletId}
                             onChange={(event) => setWalletId(event.target.value)}
-                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 xl:w-44"
+                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
                         >
                             <option value="">Semua Akun</option>
                             {wallets.map((wallet) => (
@@ -362,7 +362,7 @@ export function DashboardPage() {
                         <select
                             value={source}
                             onChange={(event) => setSource(event.target.value)}
-                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500 xl:w-40"
+                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
                         >
                             {SOURCE_OPTIONS.map((item) => (
                                 <option key={item.value} value={item.value}>
@@ -374,7 +374,7 @@ export function DashboardPage() {
                     <button
                         type="submit"
                         disabled={refreshing}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
                     >
                         {refreshing ? <Loader2 className="animate-spin" size={17} /> : <RefreshCw size={17} />}
                         Segarkan
