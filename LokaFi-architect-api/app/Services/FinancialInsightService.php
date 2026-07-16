@@ -70,8 +70,10 @@ class FinancialInsightService
         }
 
         try {
-            $raw = $this->providerClient->categorize($context['input']);
-            $validated = $this->validator->validate($raw, array_keys($context['supporting_metrics']));
+            $validated = $this->requestValidatedInsight(
+                $context['input'],
+                array_keys($context['supporting_metrics']),
+            );
         } catch (AiProviderException $exception) {
             $record = $this->storeAudit(
                 user: $user,
@@ -118,6 +120,23 @@ class FinancialInsightService
             userMessage: 'AI explanation berhasil dibuat.',
             cached: false,
         );
+    }
+
+    private function requestValidatedInsight(array $input, array $allowedEvidenceKeys): array
+    {
+        $lastValidationException = null;
+
+        for ($attempt = 1; $attempt <= 2; $attempt++) {
+            $raw = $this->providerClient->categorize($input);
+
+            try {
+                return $this->validator->validate($raw, $allowedEvidenceKeys);
+            } catch (FinancialInsightValidationException $exception) {
+                $lastValidationException = $exception;
+            }
+        }
+
+        throw $lastValidationException;
     }
 
     public function history(User $user, array $filters): array

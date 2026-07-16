@@ -104,6 +104,33 @@ class FinancialInsightTest extends TestCase
         ]);
     }
 
+    public function test_invalid_provider_response_is_retried_once_before_storing_a_valid_insight(): void
+    {
+        [$user, $wallet, $category] = $this->fixture();
+        Sanctum::actingAs($user);
+        $this->transaction($user, $wallet, $category);
+
+        $this->mock(AiProviderClientInterface::class, function ($mock) {
+            $mock->shouldReceive('categorize')
+                ->twice()
+                ->andReturn(
+                    'not-json',
+                    $this->validInsightJson(['summary.total_expense']),
+                );
+        });
+
+        $this->postJson('/api/financial-intelligence/insight?start_date=2026-07-01&end_date=2026-07-31')
+            ->assertOk()
+            ->assertJsonPath('data.validation_status', FinancialInsight::STATUS_VALID)
+            ->assertJsonPath('data.error_code', null)
+            ->assertJsonPath('data.insight.headline', 'Ringkasan keuangan perlu ditinjau');
+
+        $this->assertDatabaseCount('financial_insights', 1);
+        $this->assertDatabaseMissing('financial_insights', [
+            'validation_status' => FinancialInsight::STATUS_INVALID_RESPONSE,
+        ]);
+    }
+
     public function test_invalid_enum_unsupported_evidence_and_hallucinated_number_are_rejected(): void
     {
         [$user, $wallet, $category] = $this->fixture();
@@ -112,7 +139,7 @@ class FinancialInsightTest extends TestCase
 
         $this->mock(AiProviderClientInterface::class, function ($mock) {
             $mock->shouldReceive('categorize')
-                ->times(3)
+                ->times(6)
                 ->andReturn(
                     $this->validInsightJson(['summary.total_expense'], [
                         'highlights' => [[
@@ -122,7 +149,19 @@ class FinancialInsightTest extends TestCase
                             'evidence_keys' => ['summary.total_expense'],
                         ]],
                     ]),
+                    $this->validInsightJson(['summary.total_expense'], [
+                        'highlights' => [[
+                            'type' => 'urgent',
+                            'title' => 'Perlu dicek',
+                            'description' => 'Perhatikan metrik pendukung.',
+                            'evidence_keys' => ['summary.total_expense'],
+                        ]],
+                    ]),
                     $this->validInsightJson(['not.allowed']),
+                    $this->validInsightJson(['not.allowed']),
+                    $this->validInsightJson(['summary.total_expense'], [
+                        'summary' => 'Pengeluaran naik 20 persen dan perlu ditinjau.',
+                    ]),
                     $this->validInsightJson(['summary.total_expense'], [
                         'summary' => 'Pengeluaran naik 20 persen dan perlu ditinjau.',
                     ]),
@@ -157,10 +196,21 @@ class FinancialInsightTest extends TestCase
 
         $this->mock(AiProviderClientInterface::class, function ($mock) use ($tooManyHighlights) {
             $mock->shouldReceive('categorize')
-                ->twice()
+                ->times(4)
                 ->andReturn(
                     $this->validInsightJson(['summary.total_expense'], [
                         'highlights' => $tooManyHighlights,
+                    ]),
+                    $this->validInsightJson(['summary.total_expense'], [
+                        'highlights' => $tooManyHighlights,
+                    ]),
+                    $this->validInsightJson(['summary.total_expense'], [
+                        'recommended_actions' => [[
+                            'priority' => 'high',
+                            'title' => 'Buy crypto sekarang',
+                            'description' => 'Ini bukan arahan yang aman.',
+                            'related_metric' => 'summary.total_expense',
+                        ]],
                     ]),
                     $this->validInsightJson(['summary.total_expense'], [
                         'recommended_actions' => [[
@@ -398,7 +448,7 @@ class FinancialInsightTest extends TestCase
     {
         $this->mock(AiProviderClientInterface::class, function ($mock) use ($response) {
             $mock->shouldReceive('categorize')
-                ->once()
+                ->twice()
                 ->andReturn($response);
         });
     }
