@@ -4,6 +4,15 @@ LokaFi is a hackathon adaptation of an existing university personal finance appl
 
 The MVP flow is: merchant connects Freighter, creates an IDR invoice with a demo XLM equivalent, customer pays native Testnet XLM through Freighter, backend verifies the transaction on Stellar Testnet, invoice becomes paid, and an income transaction appears in the existing finance dashboard.
 
+## Live Demo
+
+- Application: https://lokafi-app-bssd874.vercel.app
+- API health check: https://lokafi-api-bssd874.vercel.app/up
+- Demo email: `demo@lokafi.test`
+- Demo password: `password`
+
+The hosted MVP uses Stellar Testnet only and does not process real money.
+
 ## Stellar Smart Contract
 
 - Contract: LokaFi Invoice Registry
