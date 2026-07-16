@@ -16,6 +16,16 @@ export VIEW_COMPILED_PATH="${VIEW_COMPILED_PATH:-/tmp/laravel/views}"
 mkdir -p /tmp/laravel/cache /tmp/laravel/views
 
 php artisan config:clear
+php artisan config:cache
+
+php artisan serve --host=0.0.0.0 --port="${PORT:-80}" &
+server_pid=$!
+
+cleanup() {
+    kill "$server_pid" 2>/dev/null || true
+}
+
+trap cleanup INT TERM EXIT
 
 attempt=1
 until php artisan migrate --force; do
@@ -33,6 +43,4 @@ if [ "${LOKAFI_SEED_DEMO:-false}" = "true" ]; then
     php artisan db:seed --class=LokaFiDemoSeeder --force
 fi
 
-php artisan config:cache
-
-exec php artisan serve --host=0.0.0.0 --port="${PORT:-80}"
+wait "$server_pid"
