@@ -51,3 +51,14 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# Soroban / Rust
+target/
+soroban/target/
+soroban/**/test_snapshots/
+**/.soroban/
+**/.stellar/
+stellar-keys/
+*.secret
+*.seed
+*.mnemonic
+

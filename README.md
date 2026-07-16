@@ -13,6 +13,12 @@ The MVP flow is: merchant connects Freighter, creates an IDR invoice with a demo
 
 The hosted MVP uses Stellar Testnet only and does not process real money.
 
+## Judge Testing
+
+See [`TESTING.md`](TESTING.md) for the hosted smoke test, deterministic local
+dataset, CSV fixtures and expected counts, Stellar Testnet payment flow,
+automated commands, and troubleshooting notes.
+
 ## Stellar Smart Contract
 
 - Contract: LokaFi Invoice Registry
@@ -60,8 +66,8 @@ stellar contract invoke `
 
 ## Architecture
 
-- Backend: Laravel REST API in `fiscal-architect-api`.
-- Frontend: React + Vite in `fiscal-architect-web`.
+- Backend: Laravel REST API in `LokaFi-architect-api`.
+- Frontend: React + Vite in `LokaFi-architect-web`.
 - Database: PostgreSQL for local app data.
 - Auth: Laravel Sanctum bearer tokens.
 - Stellar: Testnet only, Freighter signs in the browser, backend verifies with Horizon Testnet.
@@ -79,7 +85,7 @@ stellar contract invoke `
 ## Backend Setup
 
 ```bash
-cd fiscal-architect-api
+cd LokaFi-architect-api
 composer install
 copy .env.example .env
 php artisan key:generate
@@ -93,7 +99,7 @@ The API runs at `http://127.0.0.1:8000` by default.
 ## Frontend Setup
 
 ```bash
-cd fiscal-architect-web
+cd LokaFi-architect-web
 npm install
 copy .env.example .env
 npm run dev
@@ -151,7 +157,7 @@ Never put Stellar secret keys, mnemonics, or recovery phrases in `.env`, seeders
 ## Migrations and Seed Data
 
 ```bash
-cd fiscal-architect-api
+cd LokaFi-architect-api
 php artisan migrate
 php artisan db:seed --class=LokaFiDemoSeeder
 ```
@@ -168,14 +174,14 @@ The demo seeder stores public keys only. It does not include wallet secrets. If 
 Backend:
 
 ```bash
-cd fiscal-architect-api
+cd LokaFi-architect-api
 php artisan test
 ```
 
 Frontend:
 
 ```bash
-cd fiscal-architect-web
+cd LokaFi-architect-web
 npm run lint
 npm run build
 ```
