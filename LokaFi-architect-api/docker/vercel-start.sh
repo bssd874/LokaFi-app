@@ -27,20 +27,4 @@ cleanup() {
 
 trap cleanup INT TERM EXIT
 
-attempt=1
-until php artisan migrate --force; do
-    if [ "$attempt" -ge 10 ]; then
-        echo "Database migration failed after $attempt attempts."
-        exit 1
-    fi
-
-    echo "Database is not ready; retrying migration ($attempt/10)."
-    attempt=$((attempt + 1))
-    sleep 3
-done
-
-if [ "${LOKAFI_SEED_DEMO:-false}" = "true" ]; then
-    php artisan db:seed --class=LokaFiDemoSeeder --force
-fi
-
 wait "$server_pid"
