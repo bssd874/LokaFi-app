@@ -46,7 +46,8 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
+        /** @var User $user */
+        $user = Auth::user();
 
         $token = $user->createToken('api-token')->plainTextToken;
 

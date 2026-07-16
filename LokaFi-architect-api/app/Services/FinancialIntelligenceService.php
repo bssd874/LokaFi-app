@@ -17,13 +17,27 @@ class FinancialIntelligenceService
     public function dashboard(User $user, array $filters): array
     {
         $period = $this->period($filters);
-        $summary = $this->summary($user, $filters);
-        $budgetAlerts = $this->budgetAlerts($user, $filters);
-        $anomalies = $this->anomalies($user, array_merge($filters, [
-            'page' => 1,
-            'per_page' => 5,
-        ]));
         $transactions = $this->transactionsFor($user, $period['start'], $period['end'], $filters);
+        $previousTransactions = $this->transactionsFor(
+            $user,
+            $period['previous_start'],
+            $period['previous_end'],
+            $filters,
+        );
+        $metrics = $this->metrics($transactions, $period['days']);
+        $previousMetrics = $this->metrics($previousTransactions, $period['days']);
+        $comparison = $this->comparison($metrics, $previousMetrics);
+        $expenseDistribution = $this->expenseDistribution($transactions);
+        $sourceDistribution = $this->sourceDistribution($transactions);
+        $budgetItems = $this->budgetItems($user, $period, $filters);
+        $anomalyData = $this->anomalyData(
+            $user,
+            $transactions,
+            $previousTransactions,
+            $period,
+            $filters,
+            $budgetItems,
+        );
 
         return [
             'period' => [
@@ -37,22 +51,22 @@ class FinancialIntelligenceService
             ],
             'summary' => [
                 'total_balance' => $this->totalBalance($user, $filters),
-                'total_income' => $summary['summary']['total_income'],
-                'total_expense' => $summary['summary']['total_expense'],
-                'net_cashflow' => $summary['summary']['net_cashflow'],
-                'transactions_count' => $summary['summary']['transaction_count'],
+                'total_income' => $metrics['total_income'],
+                'total_expense' => $metrics['total_expense'],
+                'net_cashflow' => $metrics['net_cashflow'],
+                'transactions_count' => $metrics['transaction_count'],
             ],
-            'comparison' => $this->dashboardComparison($summary['comparison']),
+            'comparison' => $this->dashboardComparison($comparison),
             'daily_cashflow' => $this->dailyCashflow($transactions, $period),
-            'expense_distribution' => $summary['expense_distribution_by_category'],
-            'source_distribution' => $this->dashboardSourceDistribution($summary['source_distribution']),
+            'expense_distribution' => $expenseDistribution,
+            'source_distribution' => $this->dashboardSourceDistribution($sourceDistribution),
             'recent_transactions' => $this->recentTransactions($transactions),
-            'budget_alerts' => collect($budgetAlerts['items'])
+            'budget_alerts' => $budgetItems
                 ->whereIn('severity', ['notice', 'warning', 'critical', 'exceeded'])
                 ->take(5)
                 ->values()
                 ->all(),
-            'anomalies' => collect($anomalies['items'])->take(5)->values()->all(),
+            'anomalies' => $anomalyData['items']->take(5)->values()->all(),
             'generated_at' => now()->toIso8601String(),
         ];
     }
@@ -110,21 +124,14 @@ class FinancialIntelligenceService
         $period = $this->period($filters);
         $currentTransactions = $this->transactionsFor($user, $period['start'], $period['end'], $filters);
         $previousTransactions = $this->transactionsFor($user, $period['previous_start'], $period['previous_end'], $filters);
-        $metrics = $this->metrics($currentTransactions, $period['days']);
-        $previousMetrics = $this->metrics($previousTransactions, $period['days']);
-        $insufficientHistory = collect();
-
-        $anomalies = collect()
-            ->merge($this->unusualAmountAnomalies($user, $currentTransactions, $period, $filters, $insufficientHistory))
-            ->merge($this->categorySpikeAnomalies($currentTransactions, $previousTransactions, $period))
-            ->merge($this->frequencyAnomalies($user, $currentTransactions, $period, $filters, $insufficientHistory))
-            ->merge($this->budgetOverspendingAnomalies($user, $period, $filters))
-            ->merge($this->duplicateLikeAnomalies($currentTransactions, $period))
-            ->merge($this->negativeCashflowAnomalies($metrics, $previousMetrics, $period));
-
-        $anomalies = $anomalies
-            ->sortByDesc(fn (array $item) => $this->severityRank($item['severity']))
-            ->values();
+        $anomalyData = $this->anomalyData(
+            $user,
+            $currentTransactions,
+            $previousTransactions,
+            $period,
+            $filters,
+        );
+        $anomalies = $anomalyData['items'];
 
         $page = max(1, (int) ($filters['page'] ?? 1));
         $perPage = max(1, min((int) ($filters['per_page'] ?? 50), 100));
@@ -139,10 +146,38 @@ class FinancialIntelligenceService
                 'per_page' => $perPage,
                 'total' => $total,
             ],
-            'insufficient_history' => $insufficientHistory
+            'insufficient_history' => $anomalyData['insufficient_history']
                 ->unique(fn (array $item) => $item['type'] . ':' . ($item['category_id'] ?? 'all'))
                 ->values(),
         ]);
+    }
+
+    private function anomalyData(
+        User $user,
+        Collection $currentTransactions,
+        Collection $previousTransactions,
+        array $period,
+        array $filters,
+        ?Collection $budgetItems = null,
+    ): array {
+        $metrics = $this->metrics($currentTransactions, $period['days']);
+        $previousMetrics = $this->metrics($previousTransactions, $period['days']);
+        $insufficientHistory = collect();
+
+        $anomalies = collect()
+            ->merge($this->unusualAmountAnomalies($user, $currentTransactions, $period, $filters, $insufficientHistory))
+            ->merge($this->categorySpikeAnomalies($currentTransactions, $previousTransactions, $period))
+            ->merge($this->frequencyAnomalies($user, $currentTransactions, $period, $filters, $insufficientHistory))
+            ->merge($this->budgetOverspendingAnomalies($user, $period, $filters, $budgetItems))
+            ->merge($this->duplicateLikeAnomalies($currentTransactions, $period))
+            ->merge($this->negativeCashflowAnomalies($metrics, $previousMetrics, $period))
+            ->sortByDesc(fn (array $item) => $this->severityRank($item['severity']))
+            ->values();
+
+        return [
+            'items' => $anomalies,
+            'insufficient_history' => $insufficientHistory,
+        ];
     }
 
     private function period(array $filters): array
@@ -562,33 +597,50 @@ class FinancialIntelligenceService
     {
         $months = $this->monthsInPeriod($period['start'], $period['end']);
 
-        return Budget::with('category')
+        $budgets = Budget::with('category')
             ->where('user_id', $user->id)
             ->whereIn('month', $months)
             ->when(!empty($filters['category_id']), fn ($query) => $query->where('category_id', $filters['category_id']))
             ->orderBy('month')
-            ->get()
-            ->map(fn (Budget $budget) => $this->budgetItem($user, $budget, $period, $filters));
+            ->get();
+
+        if ($budgets->isEmpty()) {
+            return collect();
+        }
+
+        $categoryIds = $budgets->pluck('category_id')->filter()->unique()->values();
+        $historyStart = CarbonImmutable::createFromFormat('Y-m', (string) $budgets->min('month'))->startOfMonth();
+        $spentTransactions = $user->transactions()
+            ->where('type', 'expense')
+            ->whereIn('category_id', $categoryIds)
+            ->whereBetween('happened_at', [$historyStart, $period['end']])
+            ->when(!empty($filters['wallet_id']), fn ($query) => $query->where('wallet_id', $filters['wallet_id']))
+            ->when(!empty($filters['source']), fn ($query) => $query->where('source', $filters['source']))
+            ->orderBy('happened_at')
+            ->get();
+
+        return $budgets
+            ->map(fn (Budget $budget) => $this->budgetItem($budget, $period, $spentTransactions));
     }
 
-    private function budgetItem(User $user, Budget $budget, array $period, array $filters): array
+    private function budgetItem(Budget $budget, array $period, Collection $candidateTransactions): array
     {
         $monthStart = CarbonImmutable::createFromFormat('Y-m', $budget->month)->startOfMonth();
         $monthEnd = $monthStart->endOfMonth();
         $analysisDate = $period['end']->lt($monthEnd) ? $period['end'] : $monthEnd;
         $analysisDate = $analysisDate->lt($monthStart) ? $monthStart : $analysisDate;
+        $analysisEnd = $analysisDate->endOfDay();
         $daysElapsed = (int) $monthStart->diffInDays($analysisDate->startOfDay()) + 1;
         $daysInMonth = $monthStart->daysInMonth;
         $daysRemaining = max(0, $daysInMonth - $daysElapsed);
 
-        $spentTransactions = $user->transactions()
-            ->where('type', 'expense')
+        $spentTransactions = $candidateTransactions
             ->where('category_id', $budget->category_id)
-            ->whereBetween('happened_at', [$monthStart, $analysisDate->endOfDay()])
-            ->when(!empty($filters['wallet_id']), fn ($query) => $query->where('wallet_id', $filters['wallet_id']))
-            ->when(!empty($filters['source']), fn ($query) => $query->where('source', $filters['source']))
-            ->orderBy('happened_at')
-            ->get();
+            ->filter(fn (Transaction $transaction) => $transaction->happened_at !== null
+                && $transaction->happened_at->gte($monthStart)
+                && $transaction->happened_at->lte($analysisEnd))
+            ->sortBy('happened_at')
+            ->values();
 
         $spent = $spentTransactions->sum(fn (Transaction $transaction) => $this->effectiveAmount($transaction));
         $budgetAmount = (float) $budget->amount;
@@ -835,9 +887,14 @@ class FinancialIntelligenceService
             ->values();
     }
 
-    private function budgetOverspendingAnomalies(User $user, array $period, array $filters): Collection
+    private function budgetOverspendingAnomalies(
+        User $user,
+        array $period,
+        array $filters,
+        ?Collection $budgetItems = null,
+    ): Collection
     {
-        return $this->budgetItems($user, $period, $filters)
+        return ($budgetItems ?? $this->budgetItems($user, $period, $filters))
             ->whereIn('severity', ['exceeded'])
             ->map(fn (array $budget) => [
                 'type' => 'budget_overspending',

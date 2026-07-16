@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Budget;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -250,6 +252,31 @@ class DashboardTest extends TestCase
             ['date' => '2026-07-02', 'income' => 0.0, 'expense' => 0.0],
             ['date' => '2026-07-03', 'income' => 0.0, 'expense' => 0.0],
         ], $data['daily_cashflow']);
+    }
+
+    public function test_dashboard_budget_query_count_does_not_grow_per_category(): void
+    {
+        [$user] = $this->fixture();
+        Sanctum::actingAs($user);
+
+        for ($index = 1; $index <= 8; $index++) {
+            $category = $this->category($user, "Budget Category {$index}");
+
+            Budget::create([
+                'user_id' => $user->id,
+                'category_id' => $category->id,
+                'month' => '2026-07',
+                'amount' => 500000,
+            ]);
+        }
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $this->getJson('/api/dashboard/summary?start_date=2026-07-01&end_date=2026-07-31')
+            ->assertOk();
+
+        $this->assertLessThanOrEqual(8, count(DB::getQueryLog()));
     }
 
     private function fixture(): array
