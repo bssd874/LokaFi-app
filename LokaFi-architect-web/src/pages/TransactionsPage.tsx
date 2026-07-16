@@ -567,7 +567,7 @@ export function TransactionsPage() {
     }, [search, filterType, filterStatus, filterWalletId, filterFrom, filterTo]);
 
     return (
-        <div className="space-y-7">
+        <div className="min-w-0 space-y-7">
             <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-950">
@@ -612,8 +612,8 @@ export function TransactionsPage() {
                 </div>
             </section>
 
-            <div className="grid gap-6 xl:grid-cols-[1.65fr_1fr]">
-                <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+            <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,1fr)]">
+                <div className="min-w-0 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
                     <div className="mb-5 flex flex-col justify-between gap-4">
                         <div>
                             <h2 className="text-xl font-bold text-slate-950">
@@ -624,8 +624,8 @@ export function TransactionsPage() {
                             </p>
                         </div>
 
-                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-                            <div className="relative xl:col-span-2">
+                        <div className="grid min-w-0 gap-3 md:grid-cols-2 2xl:grid-cols-8">
+                            <div className="relative 2xl:col-span-2">
                                 <Search
                                     size={16}
                                     className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -643,7 +643,7 @@ export function TransactionsPage() {
                                 onChange={(event) =>
                                     setFilterStatus(event.target.value as CategorizationStatus | "")
                                 }
-                                className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                                className="min-w-0 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
                             >
                                 <option value="">Semua</option>
                                 <option value="unclassified">Belum Dikategorikan</option>
@@ -656,7 +656,7 @@ export function TransactionsPage() {
                                 onChange={(event) =>
                                     setFilterType(event.target.value as TransactionType | "")
                                 }
-                                className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                                className="min-w-0 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
                             >
                                 <option value="">All Type</option>
                                 <option value="income">Income</option>
@@ -667,7 +667,7 @@ export function TransactionsPage() {
                             <select
                                 value={filterWalletId}
                                 onChange={(event) => setFilterWalletId(event.target.value)}
-                                className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                                className="min-w-0 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
                             >
                                 <option value="">All Wallet</option>
                                 {wallets.map((wallet) => (
@@ -677,7 +677,7 @@ export function TransactionsPage() {
                                 ))}
                             </select>
 
-                            <div className="grid grid-cols-2 gap-2 xl:col-span-1">
+                            <div className="grid min-w-0 grid-cols-2 gap-2 2xl:col-span-2">
                                 <input
                                     type="date"
                                     value={filterFrom}
@@ -705,7 +705,7 @@ export function TransactionsPage() {
                                 </p>
                             </div>
 
-                            <div className="flex flex-col gap-2 sm:flex-row">
+                            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
                                 <button
                                     type="button"
                                     onClick={handleLoadReviewQueue}
@@ -751,7 +751,7 @@ export function TransactionsPage() {
                                 <select
                                     value={bulkCategoryId}
                                     onChange={(event) => setBulkCategoryId(event.target.value)}
-                                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500"
+                                    className="min-w-[180px] flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500"
                                 >
                                     <option value="">Pilih kategori</option>
                                     {categories.map((category) => (
@@ -798,7 +798,7 @@ export function TransactionsPage() {
                             </p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                        <div className="max-w-full overflow-x-auto rounded-2xl border border-slate-100">
                             <table className="w-full min-w-[1120px] text-left text-sm">
                                 <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
                                     <tr>
@@ -1054,7 +1054,7 @@ export function TransactionsPage() {
                     )}
                 </div>
 
-                <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+                <div className="min-w-0 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
                     <div className="mb-5">
                         <h2 className="text-xl font-bold text-slate-950">
                             Add Transaction
